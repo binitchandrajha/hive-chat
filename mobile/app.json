@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Hive Chat",
+    "slug": "hive-chat",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0f1117"
+    },
+    "android": {
+      "package": "com.hive.chat"
+    },
+    "ios": {
+      "bundleIdentifier": "com.hive.chat",
+      "supportsTablet": true
+    }
+  }
+}
