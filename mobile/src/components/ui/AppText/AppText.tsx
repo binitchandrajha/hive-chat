@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Text, type StyleProp, type TextProps, type TextStyle } from 'react-native';
+import { StyleSheet, Text, type StyleProp, type TextProps, type TextStyle } from 'react-native';
 
 import { colors, font, fontFamilies, type ColorToken, type FontWeight } from '../../../theme';
 import { makeStyles, MAX_FONT_MULTIPLIER } from '../../../utils/responsive';
@@ -25,6 +25,9 @@ export interface AppTextProps extends Omit<TextProps, 'style'> {
   numberOfLines?: number;
   style?: StyleProp<TextStyle>;
 }
+
+/** Line height for text whose size is overridden via `style`. */
+const LINE_HEIGHT_RATIO = 1.3;
 
 const DEFAULT_WEIGHT: Record<AppTextVariant, FontWeight> = {
   hero: 'heavy',
@@ -65,6 +68,13 @@ export default function AppText({
 }: AppTextProps) {
   const styles = useStyles();
   const w = weight ?? DEFAULT_WEIGHT[variant];
+  // A style that enlarges the text (OTP digits, avatar initials) must not inherit the
+  // variant's smaller lineHeight, or iOS clips the glyphs top and bottom.
+  const override = StyleSheet.flatten(style);
+  const fitLine =
+    override?.fontSize !== undefined && override.lineHeight === undefined
+      ? { lineHeight: Math.round(override.fontSize * LINE_HEIGHT_RATIO) }
+      : null;
   return (
     <Text
       maxFontSizeMultiplier={MAX_FONT_MULTIPLIER}
@@ -73,6 +83,7 @@ export default function AppText({
         styles[variant],
         { color: colors[color], fontFamily: fontFamilies[w], textAlign: align },
         style,
+        fitLine,
       ]}
       {...rest}
     >
