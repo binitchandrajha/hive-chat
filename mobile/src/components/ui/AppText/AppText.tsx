@@ -5,7 +5,8 @@ import { colors, font, fontFamilies, type ColorToken, type FontWeight } from '..
 import { makeStyles, MAX_FONT_MULTIPLIER } from '../../../utils/responsive';
 
 export type AppTextVariant =
-  | 'hero' // 30 · onboarding headlines
+  | 'hero' // 30 · welcome headline
+  | 'headline' // 26 · onboarding step titles
   | 'title' // 24 · large app bar
   | 'heading' // 20
   | 'subtitle' // 17 · compact app bar, sheet titles
@@ -27,6 +28,7 @@ export interface AppTextProps extends Omit<TextProps, 'style'> {
 
 const DEFAULT_WEIGHT: Record<AppTextVariant, FontWeight> = {
   hero: 'heavy',
+  headline: 'heavy',
   title: 'heavy',
   heading: 'heavy',
   subtitle: 'bold',
@@ -39,6 +41,7 @@ const DEFAULT_WEIGHT: Record<AppTextVariant, FontWeight> = {
 
 const useStyles = makeStyles(({ fs }) => ({
   hero: { fontSize: fs(font.size.hero), lineHeight: fs(33), letterSpacing: -1.2 },
+  headline: { fontSize: fs(26), lineHeight: fs(31), letterSpacing: -0.8 },
   title: { fontSize: fs(font.size.title), letterSpacing: -0.7 },
   heading: { fontSize: fs(font.size.xl), letterSpacing: -0.4 },
   subtitle: { fontSize: fs(17), letterSpacing: -0.2 },

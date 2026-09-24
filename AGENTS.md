@@ -286,15 +286,21 @@ Every component also accepts `style`. Open `ComponentGallery` in the mobile app 
 | `utils/svgId.ts` | `useSvgId()` (url-safe SVG ids), `angleToPoints()` (CSS angle → SVG gradient) | mobile |
 | `hooks/useMessages.ts` | `useMessages(user)` → `{ messages, send }` over Socket.io | mobile |
 | `data/sample.ts` | `people` — design-file sample people for the gallery/screens until the API is wired | mobile |
+| `hooks/useCountdown.ts` | `useCountdown(seconds)` → `{ left, label, done, restart }` (OTP resend timer) | mobile |
+| `utils/phone.ts` | `DEFAULT_COUNTRY`, `digitsOnly()`, `formatPhone()` (3-3-4 grouping) | mobile |
+| `utils/initials.ts` | `initialsOf(name)` → "BJ" | mobile |
+| `navigation/types.ts` | `RootStackParamList`, `ScreenProps<'Route'>` — add every new route here | mobile |
+| `navigation/RootNavigator.tsx` | Native stack, dark theme, no native headers (screens draw their own `AppBar`) | mobile |
 
 ### ui
 | Component | Key props | Status |
 |---|---|---|
-| `AppText` | `variant: 'hero' \| 'title' \| 'heading' \| 'subtitle' \| 'bodyLg' \| 'body' \| 'small' \| 'caption' \| 'overline'`, `color`, `weight`, `align`, `numberOfLines` — caps system font scaling | mobile |
+| `AppText` | `variant: 'hero' \| 'headline' \| 'title' \| 'heading' \| 'subtitle' \| 'bodyLg' \| 'body' \| 'small' \| 'caption' \| 'overline'`, `color`, `weight`, `align`, `numberOfLines` — caps system font scaling | mobile |
 | `Icon` | `name` (`IconName`, 80 glyphs), `size`, `strokeWidth`, `color`, `rotate` | mobile |
 | `Hexagon` | `size`, `height`, `fill: color \| [from, to]`, `angle`, `children` — the rounded hex shape | mobile |
 | `Gradient` | `colors`, `stops`, `type: 'linear' \| 'radial'`, `angle`, `children` | mobile |
 | `Wallpaper` | `base`, `opacity` — honeycomb chat pattern, fills its parent | mobile |
+| `Glow` | `size`, `intensity` — soft radial accent glow (splash, welcome) | mobile |
 | `Avatar` | `person`, `size`, `online`, `ring: 'new' \| 'seen'`, `icon` — hexagon shape | mobile |
 | `Logo` | `size` | mobile |
 | `IconTile` | `icon`, `color: Tint \| 'neutral'`, `size` — rounded-square coloured icon | mobile |
@@ -314,11 +320,12 @@ Every component also accepts `style`. Open `ComponentGallery` in the mobile app 
 ### layout
 | Component | Key props | Status |
 |---|---|---|
-| `Screen` | `children`, `wallpaper`, `background`, `edges`, `constrain` — safe area + background + tablet column | mobile |
+| `Screen` | `children`, `wallpaper`, `background`, `edges`, `constrain`, `avoidKeyboard` — safe area + background + tablet column | mobile |
 | `AppBar` | `title`, `sub`, `onBack`, `backIcon: 'back' \| 'close' \| 'down'`, `actions: [{icon, label, onPress}]`, `large`, `buttonVariant`, `color`, `children` | mobile |
 | `TabBar` | `active: 'chats' \| 'buzz' \| 'calls' \| 'hives' \| 'me'`, `onChange`, `newBuzz` — floating pill; pad lists with `TAB_BAR_SPACE` | mobile |
 | `Sheet` | `title`, `open`, `onClose`, `children` — bottom sheet | mobile |
 | `SectionTitle` | `title`, `action: {label, onPress}` | mobile |
+| `StepProgress` | `steps`, `current` — segmented bar for multi-step flows (onboarding) | mobile |
 | `ListRow` | `leading`, `title`, `titleColor`, `meta`, `sub`, `subRight`, `right`, `selected`, `onPress`, `onLongPress` — base for every list row | mobile |
 | `SettingsGroup` / `SettingsRow` | `icon`, `color: Tint`, `title`, `sub`, `value`, `right: 'chevron' \| 'none' \| node`, `danger`, `onPress` | mobile |
 | `ProfileHeader` | `person`, `sub`, `size`, `avatarAccessory` | mobile |
@@ -350,6 +357,15 @@ Every component also accepts `style`. Open `ComponentGallery` in the mobile app 
 | `Banner` | `text`, `title`, `variant: 'accent' \| 'warn'`, `icon`, `leading`, `right`, `onPress` | mobile |
 | `EmptyState` | `icon`, `title`, `text`, `action` | mobile |
 | `Typing` | — | mobile |
+
+### screens (mobile)
+| Flow | Screen → route | Status |
+|---|---|---|
+| 1 Onboarding | Splash → `Splash`, Welcome → `Welcome`, Phone number → `Phone`, Verify code → `Otp`, Create profile → `ProfileSetup`, Permissions → `Permissions`, First run → `ChatsEmpty` | mobile |
+| — | Component gallery (dev) → `Gallery` | mobile |
+| 2–8 | Chats, Messaging, Groups, Buzz, Calls, Hives, Settings | planned |
+
+Shared screen skeletons live next to their flow (e.g. `screens/onboarding/OnboardingStep.tsx`).
 
 ---
 

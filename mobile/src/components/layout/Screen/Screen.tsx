@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
 import { colors } from '../../../theme';
@@ -16,6 +16,8 @@ export interface ScreenProps {
   edges?: readonly Edge[];
   /** Keep content in a centred column on tablets (default true). */
   constrain?: boolean;
+  /** Lift content above the software keyboard (forms, chat). */
+  avoidKeyboard?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -28,6 +30,7 @@ export default function Screen({
   background,
   edges = ALL_EDGES,
   constrain = true,
+  avoidKeyboard = false,
   style,
 }: ScreenProps) {
   const { isTablet, contentWidth } = useResponsive();
@@ -36,15 +39,21 @@ export default function Screen({
       {wallpaper ? <Wallpaper base /> : null}
       {background ? <View style={StyleSheet.absoluteFill}>{background}</View> : null}
       <SafeAreaView edges={edges} style={styles.flex}>
-        <View
-          style={[
-            styles.flex,
-            constrain && isTablet && { width: contentWidth, alignSelf: 'center' },
-            style,
-          ]}
+        <KeyboardAvoidingView
+          enabled={avoidKeyboard}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.flex}
         >
-          {children}
-        </View>
+          <View
+            style={[
+              styles.flex,
+              constrain && isTablet && { width: contentWidth, alignSelf: 'center' },
+              style,
+            ]}
+          >
+            {children}
+          </View>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </View>
   );

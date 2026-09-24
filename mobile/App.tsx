@@ -10,7 +10,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import ComponentGallery from './src/screens/ComponentGallery';
+import RootNavigator from './src/navigation/RootNavigator';
 import { colors } from './src/theme';
 
 export default function App() {
@@ -25,7 +25,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
-      {fontsLoaded ? <ComponentGallery /> : <View style={{ flex: 1, backgroundColor: colors.bg }} />}
+      {fontsLoaded ? <RootNavigator /> : <View style={{ flex: 1, backgroundColor: colors.bg }} />}
     </SafeAreaProvider>
   );
 }

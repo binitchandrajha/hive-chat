@@ -27,7 +27,8 @@ function ContactRow({ person, sub, checked, right, onPress, style }: ContactRowP
       sub={sub ?? person.about ?? 'Hey there! I am using Hive.'}
       right={
         <>
-          {checked !== undefined ? <Check on={checked} label={person.name} onChange={onPress ? () => onPress() : undefined} /> : null}
+          {/* Display-only: the whole row is the tap target (no nested buttons). */}
+          {checked !== undefined ? <Check on={checked} label={person.name} /> : null}
           {right}
         </>
       }

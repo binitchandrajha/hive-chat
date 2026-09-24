@@ -39,6 +39,9 @@ const useStyles = makeStyles(({ s, ms, fs }) => ({
     fontSize: fs(14),
     fontFamily: fontFamilies.medium,
     paddingVertical: 0,
+    // No browser focus ring on web (Chrome's 'auto' ring ignores width) — the box shows focus.
+    outlineStyle: 'solid',
+    outlineWidth: 0,
   },
 }));
 
