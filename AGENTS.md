@@ -5,6 +5,33 @@ Read this before creating or changing a screen or component.
 
 ---
 
+## ★ Design reference & primary colour — read first
+
+**Every screen and component must be built from the design file:**
+`Claude outputs/hive-chat-ui.html` (open it in a browser).
+
+- **Screens & Flows** tab → the layout, content and order of all 36 screens in 8 flows. Build each screen to match its mockup.
+- **Clickable Prototype** tab → how screens connect (what each tap opens). Use it for navigation.
+- **Components** tab → every reusable component with its name and props. Code must use the **same names and props**.
+- It is a **visual reference, not code to copy.** Don't paste its HTML/CSS. Rebuild each piece as a typed React Native component, taking colours from the tokens (§3) and sizes through `responsive.ts` (§4a).
+- If a screen you need is not in the design file, compose it from existing components in the same style and say so in your summary — don't invent a new look.
+
+**The app's primary colour is Ocean blue — `#3D8BFF`.** It was chosen by the product owner and is final.
+
+| Token | Value | Used for |
+|---|---|---|
+| `accent` | `#3D8BFF` | buttons, sent bubbles, active tab, badges, links, toggles, FAB |
+| `accent2` | `#86B6FF` | lighter tint (highlights, focus glow) |
+| `accentDeep` | `#1F68E0` | pressed state, gradient end |
+| `onAccent` | `#FFFFFF` | text & icons on top of the accent |
+| `tick` | `#D6F3FF` | read ticks inside a sent bubble |
+
+- Always use these through the tokens (`colors.accent`, …) — never type the hex in a component.
+- The design file has a "Primary" colour switcher (Violet, Coral, Honey) that was only for choosing. **Ignore those other colours** — build with Ocean only.
+- Don't add new brand colours. Status colours (`mint`, `rose`, `sky`) are only for online/success, danger/missed and read ticks.
+
+---
+
 ## 0. Build order: mobile first
 
 **Build the mobile app (`mobile/`) first.** The web app (`web/`) comes later and will mirror the mobile components.
@@ -311,11 +338,13 @@ Status: `planned` = in the design file only · `web` / `mobile` / `both` = built
 - [ ] Sizes go through `responsive.ts`; checked on small phone, large phone, landscape and tablet.
 - [ ] New/changed component exported from `components/index.ts`.
 - [ ] Registry table in this file updated (name, props, status).
-- [ ] Screen matches `hive-chat-ui.html`.
+- [ ] Screen matches its mockup in `Claude outputs/hive-chat-ui.html`.
+- [ ] Primary colour is Ocean (`colors.accent` = `#3D8BFF`) via tokens — no other brand colour, no raw hex.
 - [ ] If the component exists on both platforms, both have the same name and props.
 
 ## 8. Don'ts
 
+- ❌ Designing a screen without checking `hive-chat-ui.html`, or using a primary colour other than Ocean `#3D8BFF`.
 - ❌ `.js` / `.jsx` source files, `any`, `as any`, `@ts-ignore`.
 - ❌ Copying a component to tweak it — add a prop/variant instead.
 - ❌ Inline one-off UI in a screen that already exists as a component.
