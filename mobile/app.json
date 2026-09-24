@@ -16,6 +16,9 @@
     "ios": {
       "bundleIdentifier": "com.hive.chat",
       "supportsTablet": true
-    }
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }

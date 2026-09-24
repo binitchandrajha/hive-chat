@@ -1,3 +1,4 @@
+import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
@@ -9,26 +10,41 @@ import {
   Text,
   TextInput,
 } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { io } from 'socket.io-client';
+import { io, type Socket } from 'socket.io-client';
+
+import type {
+  ChatMessage,
+  ClientToServerEvents,
+  ServerToClientEvents,
+} from './src/types/chat';
+
+type ChatSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 // Android emulator: 10.0.2.2 = host machine. Real device: apni LAN IP daalo.
-const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:4000' : 'http://localhost:4000';
+const API_URL: string =
+  Platform.OS === 'android' ? 'http://10.0.2.2:4000' : 'http://localhost:4000';
 
 export default function App() {
-  const socket = useMemo(() => io(API_URL, { transports: ['websocket'] }), []);
-  const [user] = useState(() => `mobile-${Math.floor(Math.random() * 1000)}`);
-  const [messages, setMessages] = useState([]);
-  const [text, setText] = useState('');
+  const socket = useMemo<ChatSocket>(() => io(API_URL, { transports: ['websocket'] }), []);
+  const [user] = useState<string>(() => `mobile-${Math.floor(Math.random() * 1000)}`);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [text, setText] = useState<string>('');
 
   useEffect(() => {
-    socket.on('message', (message) => setMessages((prev) => [...prev, message]));
-    return () => socket.close();
+    const onMessage = (message: ChatMessage): void => {
+      setMessages((prev) => [...prev, message]);
+    };
+    socket.on('message', onMessage);
+    return () => {
+      socket.off('message', onMessage);
+      socket.close();
+    };
   }, [socket]);
 
-  function send() {
-    if (!text.trim()) return;
-    socket.emit('message', { user, text: text.trim() });
+  function send(): void {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    socket.emit('message', { user, text: trimmed });
     setText('');
   }
 
@@ -41,7 +57,7 @@ export default function App() {
       >
         <Text style={styles.title}>Hive Chat — mobile ({user})</Text>
 
-        <FlatList
+        <FlatList<ChatMessage>
           data={messages}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
@@ -89,6 +105,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     color: '#e6e8ef',
   },
-  button: { backgroundColor: '#6366f1', borderRadius: 8, paddingHorizontal: 16, justifyContent: 'center' },
+  button: {
+    backgroundColor: '#6366f1',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+  },
   buttonText: { color: '#fff', fontWeight: '600' },
 });
