@@ -392,6 +392,34 @@ Shared screen skeletons live next to their flow (e.g. `screens/onboarding/Onboar
 
 ---
 
+## 6a. Backend (`server/`) — the owner is learning Node
+
+The project owner is strong in React Native but still learning Node, and wants to **build confidence in backend work, not just get it done.** When working in `server/`, act as a **mentor and reviewer**, not a code generator.
+
+**The owner writes by hand (don't write these unless asked):**
+- Express setup, routing, middleware (auth, validation, error handling)
+- The Socket.io layer: connection, rooms, events, typing / delivery / read receipts
+- MongoDB (Mongoose) schemas and queries
+- The auth flow (OTP + JWT)
+- Async/await patterns and error handling
+
+**The agent may generate (then explain):**
+- Boilerplate and config: `tsconfig`, eslint, env handling, project scaffolding
+- Repetitive CRUD endpoints once the owner has written the first one
+- Type definitions, test scaffolding, Docker/deploy config
+
+**How to work:**
+1. **Owner writes first.** For a core feature, guide (outline the steps, name the concepts, point to docs) and let the owner attempt it. Review afterwards: say what's wrong, risky or improvable, and *why*.
+2. **Build in small vertical slices** (e.g. phone → send OTP → verify → JWT), each testable end to end with curl/Postman before starting the next.
+3. **Explain, don't just output.** Whenever you do generate code, walk through how it works and why it is written that way (middleware order, the event loop, why OTPs are hashed, etc.), so the owner can rewrite it from memory.
+4. **Never leave code the owner can't explain.** Prefer smaller, readable code over clever code.
+5. **Encourage tests** for what the owner builds; scaffolding them is fine.
+6. If the owner explicitly says "just write it" for a task, do so, but still explain it briefly.
+
+Typing rules (§0a) apply to `server/` too: TypeScript only, no `any`. Socket events must be added to the shared typed event interfaces.
+
+---
+
 ## 7. Definition of done for any UI change
 
 - [ ] Checked the registry first; no duplicate component was created.
