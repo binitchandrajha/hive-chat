@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { Avatar, Button, IconButton, TextField } from '../../components';
 import type { ScreenProps } from '../../navigation/types';
 import { colors } from '../../theme';
+import { pickImageWithPrompt } from '../../utils/imagePicker';
 import { initialsOf } from '../../utils/initials';
 import { makeStyles } from '../../utils/responsive';
 import OnboardingStep from './OnboardingStep';
@@ -25,6 +26,12 @@ export default function ProfileSetupScreen({ navigation }: ScreenProps<'ProfileS
   const styles = useStyles();
   const [name, setName] = useState<string>('');
   const [about, setAbout] = useState<string>('');
+  const [photo, setPhoto] = useState<string | undefined>(undefined);
+
+  const choosePhoto = async (): Promise<void> => {
+    const image = await pickImageWithPrompt({ source: 'gallery', aspect: [1, 1] });
+    if (image) setPhoto(image.uri);
+  };
 
   return (
     <OnboardingStep
@@ -34,9 +41,26 @@ export default function ProfileSetupScreen({ navigation }: ScreenProps<'ProfileS
       onBack={() => navigation.goBack()}
     >
       <View style={styles.photo}>
-        <Avatar person={{ initials: initialsOf(name), color: 0 }} size={120} icon={name.trim() ? undefined : 'user'} />
-        {/* TODO(media): open the image picker once expo-image-picker is added. */}
-        <IconButton icon="camera" label="Add profile photo" variant="accent" iconSize={19} style={styles.camera} />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={photo ? 'Change profile photo' : 'Add profile photo'}
+          onPress={() => void choosePhoto()}
+        >
+          <Avatar
+            person={{ initials: initialsOf(name), color: 0 }}
+            size={120}
+            icon={name.trim() ? undefined : 'user'}
+            image={photo}
+          />
+        </Pressable>
+        <IconButton
+          icon="camera"
+          label={photo ? 'Change profile photo' : 'Add profile photo'}
+          variant="accent"
+          iconSize={19}
+          onPress={() => void choosePhoto()}
+          style={styles.camera}
+        />
       </View>
 
       <TextField label="Your name" value={name} placeholder="Your name" onChange={setName} autoFocus maxLength={40} />
@@ -46,7 +70,7 @@ export default function ProfileSetupScreen({ navigation }: ScreenProps<'ProfileS
         <Button
           label="Continue"
           disabled={!name.trim()}
-          // TODO(api): save name + about to the user's profile.
+          // TODO(api): upload `photo` and save name + about to the user's profile.
           onPress={() => navigation.navigate('Permissions')}
         />
       </View>

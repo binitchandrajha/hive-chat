@@ -19,7 +19,14 @@
     },
     "plugins": [
       "expo-secure-store",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Hive uses your photos so you can set a profile photo and share pictures in chats.",
+          "cameraPermission": "Hive uses your camera so you can take a profile photo and share pictures in chats."
+        }
+      ]
     ]
   }
 }

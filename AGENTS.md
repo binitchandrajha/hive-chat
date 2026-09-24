@@ -92,6 +92,28 @@ If you are unsure whether something counts as "the same component", prefer exten
 
 ---
 
+## 1a. Reusable functions & hooks — write once, register, reuse
+
+The same rule applies to **logic**, not just UI. Any function that more than one screen could need
+(picking a photo, formatting a phone number, a countdown, date formatting, uploads, permissions…)
+is written **once** and shared.
+
+| Kind of code | Where it goes | Example |
+|---|---|---|
+| Plain function (no React state) | `src/utils/<topic>.ts` | `utils/imagePicker.ts` → `pickImage()` |
+| Needs React state / effects | `src/hooks/use<Thing>.ts` | `hooks/useCountdown.ts` |
+| Server / socket calls | `src/hooks/` (e.g. `useMessages`) — never inside `components/` | |
+
+Rules:
+1. **Look first.** Before writing a helper, check the *utils, types, data* table in [§6](#6-component-registry). If it exists, import it.
+2. **Never write a one-off copy inside a screen or component** (no local `formatPhone`, no inline `ImagePicker.launch…` calls). Screens call the shared function.
+3. **Need a variation? Add an option** to the existing function (e.g. `pickImage({ source: 'camera' })`), don't create `pickImage2`.
+4. **Typed and documented.** Export typed params and return types (no `any`), and put a short usage example in the file's top comment.
+5. **Register it in the same change.** Add a row to the *utils, types, data* table in §6: file, what it gives you, status.
+6. **Wrap native modules once.** Expo / native APIs (image picker, camera, contacts, notifications, secure store…) are only ever called from their wrapper in `utils/` or `hooks/`, so permissions and error handling live in one place.
+
+---
+
 ## 2. Repo map
 
 ```
@@ -289,6 +311,7 @@ Every component also accepts `style`. Open `ComponentGallery` in the mobile app 
 | `hooks/useCountdown.ts` | `useCountdown(seconds)` → `{ left, label, done, restart }` (OTP resend timer) | mobile |
 | `utils/phone.ts` | `DEFAULT_COUNTRY`, `digitsOnly()`, `formatPhone()` (3-3-4 grouping) | mobile |
 | `utils/initials.ts` | `initialsOf(name)` → "BJ" | mobile |
+| `utils/imagePicker.ts` | `pickImage({ source: 'gallery' \| 'camera', aspect, allowsEditing, quality })` → `{ status: 'picked', image } \| 'cancelled' \| 'denied'`; `pickImageWithPrompt(opts)` → `PickedImage \| null` with the Open-Settings alert built in. Use for every photo pick (profile, group icon, chat, Buzz) | mobile |
 | `navigation/types.ts` | `RootStackParamList`, `ScreenProps<'Route'>` — add every new route here | mobile |
 | `navigation/RootNavigator.tsx` | Native stack, dark theme, no native headers (screens draw their own `AppBar`) | mobile |
 
@@ -297,11 +320,11 @@ Every component also accepts `style`. Open `ComponentGallery` in the mobile app 
 |---|---|---|
 | `AppText` | `variant: 'hero' \| 'headline' \| 'title' \| 'heading' \| 'subtitle' \| 'bodyLg' \| 'body' \| 'small' \| 'caption' \| 'overline'`, `color`, `weight`, `align`, `numberOfLines` — caps system font scaling | mobile |
 | `Icon` | `name` (`IconName`, 80 glyphs), `size`, `strokeWidth`, `color`, `rotate` | mobile |
-| `Hexagon` | `size`, `height`, `fill: color \| [from, to]`, `angle`, `children` — the rounded hex shape | mobile |
+| `Hexagon` | `size`, `height`, `fill: color \| [from, to]`, `angle`, `image` (photo clipped to the hex), `children` — the rounded hex shape | mobile |
 | `Gradient` | `colors`, `stops`, `type: 'linear' \| 'radial'`, `angle`, `children` | mobile |
 | `Wallpaper` | `base`, `opacity` — honeycomb chat pattern, fills its parent | mobile |
 | `Glow` | `size`, `intensity` — soft radial accent glow (splash, welcome) | mobile |
-| `Avatar` | `person`, `size`, `online`, `ring: 'new' \| 'seen'`, `icon` — hexagon shape | mobile |
+| `Avatar` | `person`, `size`, `online`, `ring: 'new' \| 'seen'`, `icon`, `image` (photo URI) — hexagon shape | mobile |
 | `Logo` | `size` | mobile |
 | `IconTile` | `icon`, `color: Tint \| 'neutral'`, `size` — rounded-square coloured icon | mobile |
 | `MediaThumb` | `source: { uri } \| { tint }`, `art` — photo or tinted placeholder | mobile |
@@ -376,7 +399,7 @@ Shared screen skeletons live next to their flow (e.g. `screens/onboarding/Onboar
 - [ ] Only tokens used — no raw colours/sizes in components.
 - [ ] Sizes go through `responsive.ts`; checked on small phone, large phone, landscape and tablet.
 - [ ] New/changed component exported from `components/index.ts`.
-- [ ] Registry table in this file updated (name, props, status).
+- [ ] Registry table in this file updated (name, props, status) — including any new `utils/` or `hooks/` function (§1a).
 - [ ] Screen matches its mockup in `Claude outputs/hive-chat-ui.html`.
 - [ ] Primary colour is Ocean (`colors.accent` = `#3D8BFF`) via tokens — no other brand colour, no raw hex.
 - [ ] If the component exists on both platforms, both have the same name and props.
@@ -391,3 +414,5 @@ Shared screen skeletons live next to their flow (e.g. `screens/onboarding/Onboar
 - ❌ Raw pixel numbers in styles or `Dimensions.get()` in components — use `responsive.ts`.
 - ❌ API/socket calls inside `components/`.
 - ❌ Deep imports like `components/ui/Button/Button.tsx` — import from `components`.
+- ❌ Re-writing a helper that already exists in `utils/` or `hooks/`, or calling a native module (e.g. `expo-image-picker`) directly from a screen — use the shared wrapper (§1a).
+- ❌ Changing the style of a `TextInput`'s parent view on focus — on iOS (new architecture) it kills the focus. Show focus with an overlay layer, as `TextField` does.

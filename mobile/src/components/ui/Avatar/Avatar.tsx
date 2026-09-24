@@ -20,6 +20,8 @@ export interface AvatarProps {
   ring?: AvatarRing;
   /** Show an icon instead of initials (e.g. "New group"). */
   icon?: IconName;
+  /** Profile photo URI, clipped to the hexagon. Initials/icon show until it's set. */
+  image?: string;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -40,14 +42,14 @@ const useStyles = makeStyles(({ s }) => ({
 }));
 
 /** Hexagon avatar — the Hive signature. */
-function Avatar({ person, size = 48, online = false, ring, icon, style }: AvatarProps) {
+function Avatar({ person, size = 48, online = false, ring, icon, image, style }: AvatarProps) {
   const styles = useStyles();
   const { s, fs } = useResponsive();
   const pair = avatarPalette[person.color] ?? avatarPalette[0];
 
   const face = (faceSize: number) => (
-    <Hexagon size={faceSize} fill={pair}>
-      {icon ? (
+    <Hexagon size={faceSize} fill={pair} image={image}>
+      {image ? null : icon ? (
         <Icon name={icon} size={faceSize * 0.45} color="dark" />
       ) : (
         <AppText
