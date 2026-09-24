@@ -31,7 +31,18 @@ const useStyles = makeStyles(({ s, ms, fs }) => ({
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  focus: { borderColor: colors.accent },
+  // Focus border as an overlay: restyling the TextInput's parent on focus makes it
+  // lose focus on iOS (new architecture). See TextField.
+  ring: {
+    position: 'absolute',
+    top: -1,
+    left: -1,
+    right: -1,
+    bottom: -1,
+    borderRadius: ms(14),
+    borderWidth: 1,
+    borderColor: colors.accent,
+  },
   input: {
     flex: 1,
     minWidth: 0,
@@ -69,8 +80,8 @@ export default function SearchBar({
   }
 
   return (
-    <View style={[styles.bar, focused && styles.focus, style]}>
-      <Icon name="search" size={18} color={focused ? 'text' : 'muted'} />
+    <View style={[styles.bar, style]}>
+      <Icon name="search" size={18} color="muted" />
       <TextInput
         value={value}
         onChangeText={onChange}
@@ -85,6 +96,7 @@ export default function SearchBar({
         onBlur={() => setFocused(false)}
         style={styles.input}
       />
+      <View pointerEvents="none" style={[styles.ring, { opacity: focused ? 1 : 0 }]} />
     </View>
   );
 }

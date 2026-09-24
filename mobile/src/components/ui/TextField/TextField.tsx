@@ -45,7 +45,16 @@ const useStyles = makeStyles(({ s, ms, fs }) => ({
     paddingHorizontal: ms(14),
     gap: ms(10),
   },
-  focus: {
+  // Focus border + glow as an overlay layer. The box itself must never restyle on focus:
+  // on iOS (new architecture) restyling the TextInput's parent makes it lose focus.
+  ring: {
+    position: 'absolute',
+    top: -1.5,
+    left: -1.5,
+    right: -1.5,
+    bottom: -1.5,
+    borderRadius: ms(14),
+    borderWidth: 1.5,
     borderColor: colors.accent,
     shadowColor: colors.accent,
     shadowOpacity: 0.25,
@@ -101,7 +110,7 @@ export default function TextField({
           {label}
         </AppText>
       ) : null}
-      <View style={[styles.box, isFocused && styles.focus]}>
+      <View style={styles.box}>
         {prefix ? (
           <Pressable
             accessibilityRole="button"
@@ -115,7 +124,7 @@ export default function TextField({
             <Icon name="down" size={14} color="text" />
           </Pressable>
         ) : null}
-        {icon ? <Icon name={icon} size={20} color={isFocused ? 'accent' : 'muted'} /> : null}
+        {icon ? <Icon name={icon} size={20} color="muted" /> : null}
         <TextInput
           value={value}
           onChangeText={onChange}
@@ -132,6 +141,7 @@ export default function TextField({
           onBlur={() => setHasFocus(false)}
           style={styles.input}
         />
+        <View pointerEvents="none" style={[styles.ring, { opacity: isFocused ? 1 : 0 }]} />
       </View>
     </View>
   );
