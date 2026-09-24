@@ -163,6 +163,13 @@ export const font   = {
 export type ColorToken = keyof typeof colors;
 ```
 
+The real file (`mobile/src/theme/tokens.ts`) also has these, all taken from the design file:
+- extra `colors` for specific surfaces (`wall`, `ringSeen`, `onMint`, `white`, `black`, `shade`, `callMid`, `callEnd`, `warnText`, `sun`)
+- `tints`: category colours for settings icon tiles, attachment actions and media placeholders (`blue`, `green`, `purple`, `coral`, …). Never use them as a brand colour.
+- `avatarPalette` (8 gradient pairs; index 0 follows the accent) and `senderColors` (group sender names)
+- `fontFamilies` (one loaded Plus Jakarta Sans file per weight, used by `AppText`)
+- `withAlpha(hex, opacity)` for tinted fills such as `rgba(accent, .14)`
+
 ---
 
 ## 4. Component structure
@@ -267,66 +274,82 @@ Only after §1 step 5. Rules:
 
 Update this table whenever a component is added, renamed or gains a new prop/variant.
 Status: `planned` = in the design file only · `web` / `mobile` / `both` = built in that app.
+Every component also accepts `style`. Open `ComponentGallery` in the mobile app (`npm run web` or on a device) to see them all live.
 
-### utils
+### utils, types, data
 | Utility | What it gives you | Status |
 |---|---|---|
+| `theme/tokens.ts` | `colors`, `tints`, `avatarPalette`, `senderColors`, `radius`, `space`, `font`, `fontFamilies`, `withAlpha()` | mobile |
 | `types/chat.ts` | `ChatMessage`, `NewMessagePayload`, `ServerToClientEvents`, `ClientToServerEvents` | mobile |
+| `types/person.ts` | `Person`, `AvatarSubject` (`initials` + `color`), `Tick` | mobile |
 | `utils/responsive.ts` | `useResponsive()`, `makeStyles()`, `s` `vs` `ms` `fs` `wp` `hp` `select`, breakpoints, `MAX_FONT_MULTIPLIER` | mobile |
+| `utils/svgId.ts` | `useSvgId()` (url-safe SVG ids), `angleToPoints()` (CSS angle → SVG gradient) | mobile |
+| `hooks/useMessages.ts` | `useMessages(user)` → `{ messages, send }` over Socket.io | mobile |
+| `data/sample.ts` | `people` — design-file sample people for the gallery/screens until the API is wired | mobile |
 
 ### ui
 | Component | Key props | Status |
 |---|---|---|
-| `AppText` | `variant`, `color`, `numberOfLines` — caps system font scaling | planned |
-| `Icon` | `name`, `size`, `strokeWidth` | planned |
-| `Avatar` | `person`, `size`, `online`, `ring: 'new' \| 'seen'`, `icon` — hexagon shape | planned |
-| `Logo` | `size` | planned |
-| `Button` | `label`, `variant: 'primary' \| 'ghost' \| 'text' \| 'danger'`, `icon`, `disabled`, `onPress` | planned |
-| `IconButton` | `icon`, `variant: 'plain' \| 'fill' \| 'accent'`, `onPress`, `label` (a11y) | planned |
-| `TextField` | `label`, `value`, `placeholder`, `prefix`, `icon`, `focused`, `onChange` | planned |
-| `OTPInput` | `value`, `length`, `onChange` | planned |
-| `SearchBar` | `placeholder`, `value`, `onChange` | planned |
-| `Chips` | `items: [{label, count}]`, `active`, `onChange` | planned |
-| `Badge` | `count`, `muted` | planned |
-| `Toggle` / `Radio` / `Check` | `on`, `onChange` | planned |
-| `Fab` | `icon`, `onPress` — hexagon | planned |
-| `Keypad` | `onKey` | planned |
+| `AppText` | `variant: 'hero' \| 'title' \| 'heading' \| 'subtitle' \| 'bodyLg' \| 'body' \| 'small' \| 'caption' \| 'overline'`, `color`, `weight`, `align`, `numberOfLines` — caps system font scaling | mobile |
+| `Icon` | `name` (`IconName`, 80 glyphs), `size`, `strokeWidth`, `color`, `rotate` | mobile |
+| `Hexagon` | `size`, `height`, `fill: color \| [from, to]`, `angle`, `children` — the rounded hex shape | mobile |
+| `Gradient` | `colors`, `stops`, `type: 'linear' \| 'radial'`, `angle`, `children` | mobile |
+| `Wallpaper` | `base`, `opacity` — honeycomb chat pattern, fills its parent | mobile |
+| `Avatar` | `person`, `size`, `online`, `ring: 'new' \| 'seen'`, `icon` — hexagon shape | mobile |
+| `Logo` | `size` | mobile |
+| `IconTile` | `icon`, `color: Tint \| 'neutral'`, `size` — rounded-square coloured icon | mobile |
+| `MediaThumb` | `source: { uri } \| { tint }`, `art` — photo or tinted placeholder | mobile |
+| `Button` | `label`, `variant: 'primary' \| 'ghost' \| 'text' \| 'danger'`, `icon`, `disabled`, `onPress` | mobile |
+| `IconButton` | `icon`, `label` (a11y, required), `variant: 'plain' \| 'fill' \| 'accent'`, `onPress`, `size`, `iconSize`, `color` | mobile |
+| `TextField` | `label`, `value`, `placeholder`, `prefix`, `onPrefixPress`, `icon`, `focused`, `onChange`, `keyboardType`, `showSoftInputOnFocus` | mobile |
+| `OTPInput` | `value`, `length`, `onChange`, `showSoftInputOnFocus` | mobile |
+| `SearchBar` | `placeholder`, `value`, `onChange`, `onPress` (button mode), `autoFocus` | mobile |
+| `Chips` | `items: [{label, count}]`, `active`, `onChange` | mobile |
+| `Chip` | `label`, `count`, `active`, `icon`, `trailingIcon`, `size: 'sm' \| 'md'`, `onPress` — single pill (Admin, Join, Say hi) | mobile |
+| `Badge` | `count`, `muted`, `max` | mobile |
+| `Toggle` / `Radio` / `Check` | `on`, `onChange`, `label` | mobile |
+| `Fab` | `icon`, `label`, `onPress`, `low`, `inline` — hexagon | mobile |
+| `Keypad` | `onKey: (KeypadKey) => void` | mobile |
 
 ### layout
 | Component | Key props | Status |
 |---|---|---|
-| `Screen` | `children`, `wallpaper` — safe area + background | planned |
-| `AppBar` | `title`, `sub`, `onBack`, `actions: [{icon, onPress}]`, `large` | planned |
-| `TabBar` | `active: 'chats' \| 'buzz' \| 'calls' \| 'hives' \| 'me'`, `onChange` — floating pill | planned |
-| `Sheet` | `title`, `open`, `onClose`, `children` — bottom sheet | planned |
-| `SectionTitle` | `title` | planned |
-| `SettingsGroup` / `SettingsRow` | `icon`, `color`, `title`, `sub`, `value`, `right`, `onPress` | planned |
-| `ProfileHeader` | `person`, `sub`, `size` | planned |
-| `QuickActions` | `items: [{icon, label, onPress}]` | planned |
+| `Screen` | `children`, `wallpaper`, `background`, `edges`, `constrain` — safe area + background + tablet column | mobile |
+| `AppBar` | `title`, `sub`, `onBack`, `backIcon: 'back' \| 'close' \| 'down'`, `actions: [{icon, label, onPress}]`, `large`, `buttonVariant`, `color`, `children` | mobile |
+| `TabBar` | `active: 'chats' \| 'buzz' \| 'calls' \| 'hives' \| 'me'`, `onChange`, `newBuzz` — floating pill; pad lists with `TAB_BAR_SPACE` | mobile |
+| `Sheet` | `title`, `open`, `onClose`, `children` — bottom sheet | mobile |
+| `SectionTitle` | `title`, `action: {label, onPress}` | mobile |
+| `ListRow` | `leading`, `title`, `titleColor`, `meta`, `sub`, `subRight`, `right`, `selected`, `onPress`, `onLongPress` — base for every list row | mobile |
+| `SettingsGroup` / `SettingsRow` | `icon`, `color: Tint`, `title`, `sub`, `value`, `right: 'chevron' \| 'none' \| node`, `danger`, `onPress` | mobile |
+| `ProfileHeader` | `person`, `sub`, `size`, `avatarAccessory` | mobile |
+| `QuickActions` | `items: [{icon, label, onPress}]` | mobile |
 
 ### chat
 | Component | Key props | Status |
 |---|---|---|
-| `ChatItem` | `person`, `message`, `time`, `unread`, `tick`, `muted`, `pinned`, `typing`, `sender`, `onPress` | planned |
-| `ContactRow` | `person`, `sub`, `checked`, `right`, `onPress` | planned |
-| `CallItem` | `person`, `direction: 'in' \| 'out'`, `missed`, `time`, `video`, `count` | planned |
-| `ChatHeader` | `person`, `status`, `onBack`, `onCall`, `onVideo`, `onInfo` | planned |
-| `Bubble` | `dir: 'in' \| 'out'`, `text`, `time`, `tick: 'sent' \| 'delivered' \| 'read'`, `sender`, `quote`, `reactions`, `grouped`, `image`, `voice`, `doc`, `link` | planned |
-| `DateChip` | `label` | planned |
-| `SystemNote` | `text`, `icon` | planned |
-| `Composer` | `state: 'idle' \| 'typing' \| 'recording'`, `value`, `replyTo`, `onChange`, `onSend`, `onAttach`, `onRecord` | planned |
-| `AttachGrid` | `onPick` | planned |
-| `ReactionBar` | `active`, `onPick` | planned |
-| `MessageMenu` | `items`, `onPick` | planned |
-| `BuzzCard` | `person`, `background`, `label`, `onPress` | planned |
-| `CallButton` | `icon`, `variant: 'default' \| 'on' \| 'end' \| 'ok'`, `big`, `label` | planned |
+| `ChatItem` | `person`, `message`, `time`, `unread`, `tick`, `muted`, `pinned`, `typing`, `sender`, `highlight`, `avatarSize`, `onPress`, `onLongPress` | mobile |
+| `ContactRow` | `person`, `sub`, `checked`, `right`, `onPress` | mobile |
+| `CallItem` | `person`, `direction: 'in' \| 'out'`, `missed`, `time`, `video`, `count`, `onPress`, `onCall` | mobile |
+| `ChatHeader` | `person`, `status`, `live`, `onBack`, `onCall`, `onVideo`, `onInfo`, `onMore` | mobile |
+| `Bubble` | `dir: 'in' \| 'out'`, `text` (auto-styles `@mentions`), `time`, `tick: 'sent' \| 'delivered' \| 'read'`, `sender`, `senderColor`, `quote`, `reactions`, `grouped`, `image`, `voice`, `doc`, `link`, `poll`, `onLongPress`, `onPlayVoice`, `onVote` | mobile |
+| `Waveform` | `progress`, `color`, `bars` | mobile |
+| `DateChip` | `label` | mobile |
+| `SystemNote` | `text`, `icon` | mobile |
+| `Composer` | `state: 'idle' \| 'typing' \| 'recording'` (auto from `value`), `value`, `replyTo`, `onCancelReply`, `onChange`, `onSend`, `onAttach`, `onCamera`, `onEmoji`, `onRecord`, `recordingTime`, `variant: 'default' \| 'overlay'`, `trailing` | mobile |
+| `AttachGrid` | `onPick: (AttachKind) => void` | mobile |
+| `ReactionBar` | `active`, `onPick`, `onMore`, `emojis` | mobile |
+| `MessageMenu` | `items: [{key, label, icon, danger}]`, `onPick` | mobile |
+| `BuzzCard` | `person`, `background: Tint`, `label`, `variant: 'story' \| 'add'`, `onPress` | mobile |
+| `BuzzProgress` | `count`, `current`, `progress` — Buzz viewer segments | mobile |
+| `CallButton` | `icon`, `variant: 'default' \| 'on' \| 'end' \| 'ok'`, `big`, `label`, `a11yLabel`, `size`, `onPress` | mobile |
+| `CellStrip` | `items: [{key, person, label, ring, online, icon}]`, `onPress`, `onRemove`, `size`, `wrap` — Hot Cells, favourites, selected members | mobile |
 
 ### feedback
 | Component | Key props | Status |
 |---|---|---|
-| `Banner` | `text`, `variant: 'accent' \| 'warn'`, `icon` | planned |
-| `EmptyState` | `icon`, `title`, `text`, `action` | planned |
-| `Typing` | — | planned |
+| `Banner` | `text`, `title`, `variant: 'accent' \| 'warn'`, `icon`, `leading`, `right`, `onPress` | mobile |
+| `EmptyState` | `icon`, `title`, `text`, `action` | mobile |
+| `Typing` | — | mobile |
 
 ---
 
