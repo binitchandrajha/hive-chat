@@ -10,7 +10,11 @@ function required(name: string): string {
   return value;
 }
 
+const NODE_ENV = process.env['NODE_ENV'] ?? 'development';
+
 export const env = {
+  NODE_ENV,
+  IS_PRODUCTION: NODE_ENV === 'production',
   PORT: Number(process.env['PORT'] ?? 4000),
   MONGO_URI: process.env['MONGO_URI'] ?? 'mongodb://127.0.0.1:27017/hive-chat',
   JWT_SECRET: required('JWT_SECRET'),
