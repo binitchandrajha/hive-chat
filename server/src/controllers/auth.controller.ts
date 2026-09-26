@@ -1,43 +1,60 @@
 /**
  * Auth controller: handlers for the /auth routes.
- * A controller reads the request, calls models/utils, and sends the response.
+ * A controller reads the request, calls the service, and sends the response.
  * The route file only says "this URL -> this function".
  * On failure, throw an AppError: the global errorHandler sends the response.
  */
 import type { Request, Response } from 'express';
-import { OtpModel } from '../models/Otp.js';
+import { requestOtp, verifyOtpAndLogin } from '../services/auth.service.js';
+import type { VerifyOtpResponse } from '../types/api.js';
 import { AppError } from '../utils/AppError.js';
-import { generateOtp, hashOtp } from '../utils/otp.js';
+import { OTP_LENGTH } from '../utils/otp.js';
 import { normalizePhone } from '../utils/phone.js';
 
-const OTP_TTL_MS = 5 * 60 * 1000;
+const OTP_PATTERN = new RegExp(`^\\d{${OTP_LENGTH}}$`);
 
 interface SendOtpBody {
   phone?: unknown;
 }
 
-export async function sendOtp(req: Request<unknown, unknown, SendOtpBody>, res: Response): Promise<void> {
-  const rawPhone = req.body?.phone;
-  if (typeof rawPhone !== 'string') {
+interface VerifyOtpBody {
+  phone?: unknown;
+  code?: unknown;
+}
+
+/** Body values are `unknown` until checked: return a normalised phone or throw 422. */
+function parsePhone(value: unknown): string {
+  if (typeof value !== 'string') {
     throw AppError.validation('phone is required', [{ field: 'phone', message: 'phone is required' }]);
   }
-
-  const phone = normalizePhone(rawPhone);
+  const phone = normalizePhone(value);
   if (!phone) {
     throw AppError.validation('Invalid phone number', [{ field: 'phone', message: 'Invalid phone number' }]);
   }
+  return phone;
+}
 
-  const code = generateOtp();
+function parseCode(value: unknown): string {
+  if (typeof value !== 'string' || !OTP_PATTERN.test(value)) {
+    const message = `code must be ${OTP_LENGTH} digits`;
+    throw AppError.validation(message, [{ field: 'code', message }]);
+  }
+  return value;
+}
 
-  // One Otp document per phone (phone is unique): create it, or replace the old one.
-  await OtpModel.findOneAndUpdate(
-    { phone },
-    { codeHash: hashOtp(code), expiresAt: new Date(Date.now() + OTP_TTL_MS), attempts: 0 },
-    { upsert: true },
-  );
-
-  // No SMS provider yet, so print the code in the server terminal.
-  console.log(`[otp] ${phone} -> ${code}`);
-
+export async function sendOtp(req: Request<unknown, unknown, SendOtpBody>, res: Response): Promise<void> {
+  const phone = parsePhone(req.body?.phone);
+  await requestOtp(phone);
   res.json({ ok: true });
+}
+
+export async function verifyOtp(
+  req: Request<unknown, VerifyOtpResponse, VerifyOtpBody>,
+  res: Response<VerifyOtpResponse>,
+): Promise<void> {
+  const phone = parsePhone(req.body?.phone);
+  const code = parseCode(req.body?.code);
+
+  const { token, isNewUser, user } = await verifyOtpAndLogin(phone, code);
+  res.json({ ok: true, token, isNewUser, user });
 }

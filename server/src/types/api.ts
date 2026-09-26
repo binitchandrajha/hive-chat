@@ -33,3 +33,21 @@ export interface FieldError {
   field: string;
   message: string;
 }
+
+/** What the app is allowed to see about a user. */
+export interface PublicUser {
+  id: string;
+  phone: string;
+  name: string | null;
+  about: string | null;
+  avatar: string | null;
+}
+
+/** POST /auth/verify-otp → 200 */
+export interface VerifyOtpResponse {
+  ok: true;
+  token: string;
+  /** true until the user has saved a name: the app shows ProfileSetup. */
+  isNewUser: boolean;
+  user: PublicUser;
+}
