@@ -57,3 +57,6 @@ export interface GetMeResponse {
   ok: true;
   user: PublicUser;
 }
+
+/** PATCH /profile/me → 200 (the updated user). */
+export type UpdateMeResponse = GetMeResponse;
