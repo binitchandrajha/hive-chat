@@ -51,3 +51,9 @@ export interface VerifyOtpResponse {
   isNewUser: boolean;
   user: PublicUser;
 }
+
+/** GET /profile/me → 200 */
+export interface GetMeResponse {
+  ok: true;
+  user: PublicUser;
+}

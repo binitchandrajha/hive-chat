@@ -14,6 +14,7 @@ import type { PublicUser } from '../types/api.js';
 import { AppError } from '../utils/AppError.js';
 import { signAuthToken } from '../utils/jwt.js';
 import { generateOtp, hashOtp, safeEqual } from '../utils/otp.js';
+import { toPublicUser } from '../utils/publicUser.js';
 
 export const OTP_TTL_MS = 5 * 60 * 1000;
 export const MAX_OTP_ATTEMPTS = 5;
@@ -76,12 +77,6 @@ export async function verifyOtpAndLogin(phone: string, code: string): Promise<Lo
     token: signAuthToken(user.id),
     // "New" = has not finished ProfileSetup yet, even if the account already exists.
     isNewUser: !user.name,
-    user: {
-      id: user.id,
-      phone: user.phone,
-      name: user.name ?? null,
-      about: user.about ?? null,
-      avatar: user.avatar ?? null,
-    },
+    user: toPublicUser(user),
   };
 }
